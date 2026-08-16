@@ -29,6 +29,53 @@ class TestHealth:
         assert data.get("status") == "ok"
 
 
+# ---------- AI Tip ----------
+class TestAiTip:
+    def test_ai_tip_no_scan_returns_fallback(self, s):
+        """Fresh device with no scans should gracefully return ai:false, no 500."""
+        fresh_dev = f"TEST_{uuid.uuid4().hex[:12]}"
+        r = s.get(f"{API}/ai-tip", params={"device_id": fresh_dev})
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data.get("ai") is False
+        assert isinstance(data.get("title"), str) and data["title"]
+        assert isinstance(data.get("body"), str) and data["body"]
+        assert "icon" in data
+
+    def test_ai_tip_with_scan_and_caching(self, s):
+        """With a scan seeded, first call may be ai:true (LLM) and 2nd call must be identical (cached)."""
+        dev = f"TEST_{uuid.uuid4().hex[:12]}"
+        seed = {
+            "device_id": dev,
+            "type": "quick",
+            "health_score": 62,
+            "junk_bytes": 900_000_000,
+            "duplicate_count": 34,
+            "photo_count": 4200,
+            "app_count": 128,
+            "storage_used": 92_000_000_000,
+            "storage_total": 128_000_000_000,
+            "battery_level": 0.35,
+        }
+        rc = s.post(f"{API}/scans", json=seed)
+        assert rc.status_code == 200, rc.text
+
+        r1 = s.get(f"{API}/ai-tip", params={"device_id": dev}, timeout=60)
+        assert r1.status_code == 200, r1.text
+        d1 = r1.json()
+        assert d1.get("title") and d1.get("body") and "icon" in d1
+
+        r2 = s.get(f"{API}/ai-tip", params={"device_id": dev}, timeout=60)
+        assert r2.status_code == 200, r2.text
+        d2 = r2.json()
+        # Cached call must match exactly
+        assert d2["title"] == d1["title"]
+        assert d2["body"] == d1["body"]
+        assert d2["icon"] == d1["icon"]
+        # If LLM succeeded, both should say ai:true; if fallback both ai:false
+        assert d2.get("ai") == d1.get("ai")
+
+
 # ---------- Scans + Dashboard ----------
 class TestScans:
     def test_create_scan(self, s, device_id):

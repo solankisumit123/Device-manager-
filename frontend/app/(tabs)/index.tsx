@@ -44,7 +44,7 @@ export default function Home() {
   const [score, setScore] = useState(0);
   const [junk, setJunk] = useState(0);
   const [dupCount, setDupCount] = useState(0);
-  const [tip, setTip] = useState<{ title: string; body: string; icon: string } | null>(null);
+  const [tip, setTip] = useState<{ title: string; body: string; icon: string; ai?: boolean } | null>(null);
   const [predictDays, setPredictDays] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -79,6 +79,11 @@ export default function Home() {
       const dash = await api.getDashboard();
       setTip(dash.tip);
       setPredictDays(dash.predict_days_until_full ?? null);
+      // AI Phone Doctor — personalized daily tip (cached per day on the backend)
+      try {
+        const aiTip = await api.getAiTip();
+        if (aiTip?.title) setTip(aiTip);
+      } catch {}
     } catch (e) {
       // offline — keep local values
     }
@@ -176,7 +181,15 @@ export default function Home() {
           <Card style={styles.tipCard} testID="home-tip-card">
             <IconChip name={(tip.icon as any) || "bulb"} color={colors.brand} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.tipTitle}>{tip.title}</Text>
+              <View style={styles.tipTitleRow}>
+                <Text style={styles.tipTitle}>{tip.title}</Text>
+                {tip.ai ? (
+                  <View style={styles.aiBadge}>
+                    <Ionicons name="sparkles" size={10} color={colors.brand} />
+                    <Text style={styles.aiBadgeText}>AI</Text>
+                  </View>
+                ) : null}
+              </View>
               <Text style={styles.tipBody}>{tip.body}</Text>
               {predictDays != null ? (
                 <Text style={styles.predict}>
@@ -267,6 +280,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   tipTitle: { fontSize: font.lg, fontWeight: "700", color: colors.onSurface },
+  tipTitleRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  aiBadge: { flexDirection: "row", alignItems: "center", gap: 2, backgroundColor: colors.brandSoft, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 2 },
+  aiBadgeText: { fontSize: 10, fontWeight: "800", color: colors.brand },
   tipBody: { fontSize: font.base, color: colors.muted, marginTop: 2, lineHeight: 20 },
   predict: { fontSize: font.sm, color: colors.warning, fontWeight: "600", marginTop: spacing.sm },
   grid: {

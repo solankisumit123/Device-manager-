@@ -44,6 +44,10 @@ export const api = {
     const id = await getDeviceId();
     return request<any>(`/dashboard?device_id=${id}`);
   },
+  getAiTip: async () => {
+    const id = await getDeviceId();
+    return request<any>(`/ai-tip?device_id=${id}`);
+  },
   saveScan: async (body: Record<string, any>) => {
     const id = await getDeviceId();
     return request<any>(`/scans`, {

@@ -18,14 +18,16 @@ const SECTIONS: { title: string; tools: Tool[] }[] = [
     tools: [
       { icon: "image", label: "Photo cleanup", color: colors.info, route: "/duplicates" },
       { icon: "sparkles", label: "Junk cleaner", color: colors.brand, route: "/clean" },
+      { icon: "albums", label: "Photo compressor", color: colors.error, route: "/compress" },
       { icon: "apps", label: "App management", color: colors.warning, route: "/apps" },
-      { icon: "flash", label: "System boost", color: colors.error, route: "/optimise" },
+      { icon: "flash", label: "System boost", color: colors.purple, route: "/optimise" },
     ],
   },
   {
     title: "Storage & files",
     tools: [
       { icon: "pie-chart", label: "Storage analyzer", color: colors.purple, route: "/storage" },
+      { icon: "cloud-upload", label: "Cloud offload", color: colors.info, route: "/offload" },
       { icon: "trash-bin", label: "Trash & recovery", color: colors.muted, route: "/trash" },
     ],
   },

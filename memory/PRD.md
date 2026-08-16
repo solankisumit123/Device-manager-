@@ -25,6 +25,20 @@ RAM/CPU boost). Every delete has a 7-day trash/undo safety net.
   app manager, privacy cleaner, security scan, file vault, trash/recovery, premium paywall.
 - Honest metrics; 7-day trash before permanent delete; contextual permission handling.
 
+## Implemented (2026-08-16, iteration 2 — new features)
+- **Photo Compressor** (`/compress`): scans largest photos, live "estimated savings" that
+  updates with selection + compression level (High/Balanced/Max), real on-device compression via
+  expo-image-manipulator (native) with graceful fallback, saves compressed copy, moves originals
+  to 7-day Trash, shows "space saved" summary. Free tier capped at 10 → paywall.
+- **Smarter AI Doctor** (`/api/ai-tip`): genuine LLM tip (Emergent key, gpt-5.4-mini) personalized
+  to real device metrics, cached once per device per day, honest (no fake boost claims), with a
+  rule-based fallback when offline/no key. Home tip card shows an "AI" badge.
+- **Cloud Offload** (`/offload`): flags photos untouched 6+ months, shows total reclaimable size,
+  "Open cloud backup" deep-link + "Free space" moves to 7-day Trash.
+- Fixed: `POST /api/trash` no longer 422s when items omit per-item `device_id` (injected from
+  request) — this had silently blocked persistence for duplicate/compress/offload flows.
+- Backend tests now 18/18 passing (added AI-tip fallback + cache tests).
+
 ## Implemented (2026-08-16)
 - Onboarding (3 slides) + persisted flag.
 - Bottom tabs: Home, Tools, Vault, Settings.

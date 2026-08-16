@@ -10,6 +10,8 @@ from typing import List, Optional, Annotated, Any
 from bson import ObjectId
 import uuid
 from datetime import datetime, timezone, timedelta
+import json
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -18,6 +20,8 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
 
 app = FastAPI(title="Device Manager Pro API")
 api_router = APIRouter(prefix="/api")
@@ -65,7 +69,7 @@ class Prefs(BaseModel):
 
 
 class TrashItemCreate(BaseModel):
-    device_id: str
+    device_id: Optional[str] = None
     name: str
     kind: str = "photo"  # photo | file | video | audio | app
     size_bytes: int = 0
@@ -201,6 +205,81 @@ async def dashboard(device_id: str):
     }
 
 
+def parse_json_block(text: str) -> Optional[dict]:
+    try:
+        start = text.index("{")
+        end = text.rindex("}") + 1
+        return json.loads(text[start:end])
+    except Exception:
+        return None
+
+
+@api_router.get("/ai-tip")
+async def ai_tip(device_id: str):
+    today = now_utc().strftime("%Y-%m-%d")
+    cached = await db.ai_tips.find_one({"device_id": device_id, "date": today})
+    if cached:
+        return {
+            "title": cached["title"],
+            "body": cached["body"],
+            "icon": cached.get("icon", "bulb"),
+            "ai": True,
+        }
+
+    doc = await db.scans.find_one({"device_id": device_id}, sort=[("created_at", -1)])
+    latest = clean_doc(doc) if doc else None
+    fallback = build_tip(latest)
+
+    if not EMERGENT_LLM_KEY or not latest:
+        return {**fallback, "ai": False}
+
+    storage_pct = 0
+    if latest.get("storage_total"):
+        storage_pct = round(latest["storage_used"] / latest["storage_total"] * 100)
+    metrics = (
+        f"Health score: {latest.get('health_score', 0)}/100. "
+        f"Storage used: {storage_pct}%. "
+        f"Estimated junk: {round(latest.get('junk_bytes', 0) / (1024*1024))} MB. "
+        f"Duplicate photos: {latest.get('duplicate_count', 0)}. "
+        f"Photos on device: {latest.get('photo_count', 0)}. "
+        f"Battery level: {round(latest.get('battery_level', 0) * 100)}%."
+    )
+
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"tip-{device_id}-{today}",
+            system_message=(
+                "You are the AI Phone Doctor inside a phone cleaner app. "
+                "Given device metrics, write ONE short, friendly, specific daily tip. "
+                "Be honest — never claim fake RAM/CPU boosts. Focus on real actions the user "
+                "can take (clean junk, remove duplicates, free storage, save battery). "
+                "Respond ONLY with compact JSON: "
+                '{"title": "<max 5 words>", "body": "<max 24 words>", '
+                '"icon": "<one ionicon name from: sparkles, images, warning, battery-half, '
+                'shield-checkmark, trending-up, cloud-upload, bulb>"}'
+            ),
+        ).with_model("openai", "gpt-5.4-mini")
+        resp = await chat.send_message(UserMessage(text=metrics))
+        parsed = parse_json_block(resp if isinstance(resp, str) else str(resp))
+        if parsed and parsed.get("title") and parsed.get("body"):
+            tip = {
+                "title": str(parsed["title"])[:60],
+                "body": str(parsed["body"])[:200],
+                "icon": parsed.get("icon", "bulb"),
+            }
+            await db.ai_tips.update_one(
+                {"device_id": device_id, "date": today},
+                {"$set": {**tip, "device_id": device_id, "date": today}},
+                upsert=True,
+            )
+            return {**tip, "ai": True}
+    except Exception as e:
+        logging.warning(f"ai-tip generation failed: {e}")
+
+    return {**fallback, "ai": False}
+
+
 @api_router.get("/prefs", response_model=Prefs)
 async def get_prefs(device_id: str):
     doc = await db.prefs.find_one({"device_id": device_id})
@@ -237,7 +316,9 @@ async def list_trash(device_id: str):
 async def add_trash(payload: TrashAddRequest):
     created = []
     for item in payload.items:
-        t = TrashItem(**item.dict())
+        data = item.dict()
+        data["device_id"] = payload.device_id
+        t = TrashItem(**data)
         created.append(t)
     if created:
         await db.trash.insert_many([t.dict() for t in created])
