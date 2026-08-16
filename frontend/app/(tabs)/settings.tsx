@@ -3,15 +3,13 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-nat
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { colors, font, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { api } from "@/src/lib/api";
-import { useApp } from "@/src/lib/store";
 
 const SCHEDULES = ["off", "daily", "weekly"] as const;
 
 export default function Settings() {
   const router = useRouter();
-  const { premium, setPremium, toast } = useApp();
   const [autopilot, setAutopilot] = useState(false);
   const [schedule, setSchedule] = useState<(typeof SCHEDULES)[number]>("weekly");
   const [notifications, setNotifications] = useState(true);
@@ -31,7 +29,7 @@ export default function Settings() {
 
   const save = (patch: Record<string, any>) => {
     api
-      .updatePrefs({ premium, autopilot, schedule, notifications, ...patch })
+      .updatePrefs({ premium: true, autopilot, schedule, notifications, ...patch })
       .catch(() => {});
   };
 
@@ -69,24 +67,17 @@ export default function Settings() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Settings</Text>
       </View>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl }} showsVerticalScrollIndicator={false}>
-        {/* Premium banner */}
-        <Pressable
-          style={styles.premiumCard}
-          onPress={() => (premium ? undefined : router.push("/paywall"))}
-          testID="settings-premium"
-        >
+      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }} showsVerticalScrollIndicator={false}>
+        {/* All-free banner */}
+        <View style={styles.premiumCard} testID="settings-freebanner">
           <View style={styles.premChip}>
-            <Ionicons name="diamond" size={24} color="#fff" />
+            <Ionicons name="gift" size={24} color="#fff" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.premTitle}>{premium ? "Premium active" : "Go Premium"}</Text>
-            <Text style={styles.premSub}>
-              {premium ? "All tools unlocked · ad-free" : "Unlock vault, AI doctor & more"}
-            </Text>
+            <Text style={styles.premTitle}>All tools unlocked</Text>
+            <Text style={styles.premSub}>Every feature is free — no subscription needed</Text>
           </View>
-          {!premium ? <Ionicons name="chevron-forward" size={20} color={colors.brand} /> : null}
-        </Pressable>
+        </View>
 
         <Text style={styles.section}>Smart Auto-Pilot</Text>
         <View style={styles.card}>
@@ -101,11 +92,6 @@ export default function Settings() {
                 onValueChange={(v) => {
                   setAutopilot(v);
                   save({ autopilot: v });
-                  if (v && !premium) {
-                    setAutopilot(false);
-                    save({ autopilot: false });
-                    router.push("/paywall");
-                  }
                 }}
                 trackColor={{ true: colors.brand, false: colors.borderStrong }}
                 thumbColor="#fff"
@@ -174,12 +160,6 @@ export default function Settings() {
             sub="No fake RAM/CPU boost claims — real space freed only"
           />
         </View>
-
-        {premium ? (
-          <Pressable style={styles.restore} onPress={() => { setPremium(false); toast("Premium disabled (demo)", "info"); }} testID="settings-disable-premium">
-            <Text style={styles.restoreText}>Disable Premium (demo)</Text>
-          </Pressable>
-        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -214,6 +194,4 @@ const styles = StyleSheet.create({
   schedChipOn: { backgroundColor: colors.brand },
   schedText: { fontSize: font.base, fontWeight: "600", color: colors.onSurface },
   schedTextOn: { color: "#fff" },
-  restore: { alignItems: "center", paddingVertical: spacing.xl },
-  restoreText: { fontSize: font.base, color: colors.error, fontWeight: "600" },
 });

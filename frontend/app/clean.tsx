@@ -12,7 +12,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { haptics } from "@/src/lib/haptics";
-import { colors, font, formatBytes, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, formatBytes, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { Card, IconChip, PillButton, ScreenHeader } from "@/src/components/ui";
 import { StorageCard } from "@/src/components/StorageBar";
 import {
@@ -243,7 +243,7 @@ export default function CleanUp() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingHorizontal: spacing.lg },
+  content: { paddingHorizontal: spacing.lg, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" },
   hero: { alignItems: "center", paddingVertical: spacing.lg },
   heroNum: { fontSize: 44, fontWeight: "800", color: colors.onSurface },
   viewDetails: { fontSize: font.base, color: colors.brand, fontWeight: "600", marginTop: spacing.xs },

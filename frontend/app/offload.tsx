@@ -13,7 +13,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { colors, font, formatBytes, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, formatBytes, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { PillButton, ScreenHeader } from "@/src/components/ui";
 import { listOldPhotos, SimplePhoto } from "@/src/lib/photos";
 import { api } from "@/src/lib/api";
@@ -108,7 +108,7 @@ export default function Offload() {
         </View>
       ) : (
         <>
-          <ScrollView contentContainerStyle={{ paddingBottom: 180 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 180, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }} showsVerticalScrollIndicator={false}>
             <View style={styles.hero}>
               <View style={styles.heroBadge}>
                 <Ionicons name="cloud-upload" size={30} color="#fff" />

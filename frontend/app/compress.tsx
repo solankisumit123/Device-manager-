@@ -11,7 +11,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { colors, font, formatBytes, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, formatBytes, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { PillButton, ScreenHeader } from "@/src/components/ui";
 import { compressPhoto, listLargePhotos, SimplePhoto } from "@/src/lib/photos";
 import { api } from "@/src/lib/api";
@@ -27,7 +27,7 @@ const QUALITIES = [
 export default function Compress() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { premium, toast } = useApp();
+  const { toast } = useApp();
 
   const [loading, setLoading] = useState(true);
   const [photos, setPhotos] = useState<SimplePhoto[]>([]);
@@ -67,10 +67,6 @@ export default function Compress() {
 
   const run = async () => {
     if (selectedPhotos.length === 0) return;
-    if (!premium && selectedPhotos.length > 10) {
-      router.push("/paywall");
-      return;
-    }
     setWorking(true);
     // Attempt real on-device compression (native only); errors are non-fatal.
     for (const p of selectedPhotos) {
@@ -126,7 +122,7 @@ export default function Compress() {
         </View>
       ) : (
         <>
-          <ScrollView contentContainerStyle={{ paddingBottom: 160 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 160, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }} showsVerticalScrollIndicator={false}>
             <View style={styles.hero}>
               <Text style={styles.savedNum}>~{formatBytes(estSaved)}</Text>
               <Text style={styles.savedLabel}>

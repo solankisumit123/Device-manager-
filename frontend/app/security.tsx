@@ -4,7 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { haptics } from "@/src/lib/haptics";
-import { colors, font, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { PillButton, ScreenHeader } from "@/src/components/ui";
 import { api } from "@/src/lib/api";
 
@@ -53,7 +53,7 @@ export default function Security() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <ScreenHeader title="Viruses & risks" onBack={() => router.back()} />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 120 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 120, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }}>
         <View style={styles.hero}>
           <Text style={styles.secureText}>{scanning ? "Scanning…" : "Secure"}</Text>
           <Text style={styles.secureSub}>

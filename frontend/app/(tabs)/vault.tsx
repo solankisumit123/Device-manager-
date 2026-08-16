@@ -10,24 +10,18 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import * as LocalAuthentication from "expo-local-authentication";
-import { colors, font, formatBytes, radius, shadow, spacing } from "@/src/theme";
+import * as DocumentPicker from "expo-document-picker";
+import { colors, font, formatBytes, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { PillButton } from "@/src/components/ui";
 import { api } from "@/src/lib/api";
 import { useApp } from "@/src/lib/store";
 
 type VItem = { id: string; name: string; kind: string; size_bytes: number; thumb_uri?: string };
 
-const SAMPLE = [
-  { name: "Passport_scan.jpg", kind: "photo", size_bytes: 2.1 * 1024 * 1024, thumb_uri: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=300&q=60" },
-  { name: "ID_card.jpg", kind: "photo", size_bytes: 1.4 * 1024 * 1024, thumb_uri: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=300&q=60" },
-];
-
 export default function Vault() {
-  const router = useRouter();
-  const { premium, toast } = useApp();
+  const { toast } = useApp();
   const [unlocked, setUnlocked] = useState(false);
   const [authing, setAuthing] = useState(false);
   const [items, setItems] = useState<VItem[]>([]);
@@ -75,14 +69,25 @@ export default function Vault() {
     setAuthing(false);
   };
 
-  const addSample = async () => {
-    const pick = SAMPLE[items.length % SAMPLE.length];
+  const pickFile = async () => {
     try {
-      const created = await api.addVault(pick);
+      const res = await DocumentPicker.getDocumentAsync({
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (res.canceled || !res.assets?.length) return;
+      const f = res.assets[0];
+      const isImage = (f.mimeType || "").startsWith("image");
+      const created = await api.addVault({
+        name: f.name,
+        kind: isImage ? "photo" : "file",
+        size_bytes: f.size ?? 0,
+        thumb_uri: isImage ? f.uri : undefined,
+      });
       setItems((p) => [created as VItem, ...p]);
       toast("Moved to vault", "success");
     } catch {
-      toast("Could not add to vault", "error");
+      toast("Could not add file", "error");
     }
   };
 
@@ -93,26 +98,6 @@ export default function Vault() {
       toast("Removed from vault", "info");
     } catch {}
   };
-
-  if (!premium) {
-    return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Vault</Text>
-        </View>
-        <View style={styles.center}>
-          <View style={[styles.badge, { backgroundColor: colors.purple }]}>
-            <Ionicons name="diamond" size={44} color="#fff" />
-          </View>
-          <Text style={styles.title}>Vault is a Premium feature</Text>
-          <Text style={styles.sub}>
-            Keep sensitive photos and documents in an encrypted, biometric-locked folder.
-          </Text>
-          <PillButton label="Unlock Premium" icon="diamond" onPress={() => router.push("/paywall")} style={{ alignSelf: "stretch", marginTop: spacing.xl }} testID="vault-go-premium" />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   if (!unlocked) {
     return (
@@ -152,14 +137,14 @@ export default function Vault() {
           <ActivityIndicator color={colors.brand} size="large" />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
-          <Pressable style={styles.addRow} onPress={addSample} testID="vault-add">
+        <ScrollView contentContainerStyle={{ padding: spacing.lg, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }}>
+          <Pressable style={styles.addRow} onPress={pickFile} testID="vault-add">
             <View style={[styles.addChip]}>
               <Ionicons name="add" size={26} color={colors.brand} />
             </View>
             <View>
-              <Text style={styles.addTitle}>Move files to vault</Text>
-              <Text style={styles.sub}>Encrypted & hidden from gallery</Text>
+              <Text style={styles.addTitle}>Add files to vault</Text>
+              <Text style={styles.sub}>Pick a photo or file · encrypted & hidden</Text>
             </View>
           </Pressable>
 

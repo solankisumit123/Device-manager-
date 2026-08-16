@@ -2,14 +2,13 @@ import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { colors, font, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 
 type Tool = {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   color: string;
   route: string;
-  premium?: boolean;
 };
 
 const SECTIONS: { title: string; tools: Tool[] }[] = [
@@ -35,9 +34,8 @@ const SECTIONS: { title: string; tools: Tool[] }[] = [
     title: "Privacy & security",
     tools: [
       { icon: "eye-off", label: "Privacy cleaner", color: colors.warning, route: "/privacy" },
-      { icon: "lock-closed", label: "Private vault", color: colors.brand, route: "/(tabs)/vault", premium: true },
+      { icon: "lock-closed", label: "Private vault", color: colors.brand, route: "/(tabs)/vault" },
       { icon: "shield-checkmark", label: "Security scan", color: colors.info, route: "/security" },
-      { icon: "diamond", label: "Go Premium", color: colors.purple, route: "/paywall" },
     ],
   },
 ];
@@ -67,11 +65,6 @@ export default function Tools() {
                   <Text style={styles.label} numberOfLines={2}>
                     {t.label}
                   </Text>
-                  {t.premium ? (
-                    <View style={styles.proBadge}>
-                      <Text style={styles.proText}>PRO</Text>
-                    </View>
-                  ) : null}
                 </Pressable>
               ))}
             </View>
@@ -86,7 +79,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   headerTitle: { fontSize: font.xxl, fontWeight: "800", color: colors.onSurface },
-  content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
+  content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" },
   section: { marginBottom: spacing.lg },
   sectionTitle: {
     fontSize: font.base,
@@ -105,14 +98,4 @@ const styles = StyleSheet.create({
   },
   chip: { width: 48, height: 48, borderRadius: radius.pill, alignItems: "center", justifyContent: "center" },
   label: { fontSize: font.lg, fontWeight: "600", color: colors.onSurface },
-  proBadge: {
-    position: "absolute",
-    top: spacing.md,
-    right: spacing.md,
-    backgroundColor: colors.purple,
-    borderRadius: radius.sm,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  proText: { color: "#fff", fontSize: 10, fontWeight: "800" },
 });

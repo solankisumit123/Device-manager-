@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Platform } from "react-native";
 import { haptics } from "@/src/lib/haptics";
-import { colors, font, formatBytes, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, formatBytes, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { PillButton, ScreenHeader } from "@/src/components/ui";
 import {
   DuplicateGroup,
@@ -30,7 +30,7 @@ type Phase = "intro" | "denied" | "scanning" | "results";
 export default function Duplicates() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { premium, toast } = useApp();
+  const { toast } = useApp();
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [groups, setGroups] = useState<DuplicateGroup[]>([]);
@@ -114,10 +114,6 @@ export default function Duplicates() {
         origin: "Duplicate Finder",
       }));
     if (items.length === 0) return;
-    if (!premium && items.length > 50) {
-      router.push("/paywall");
-      return;
-    }
     try {
       await api.addTrash(items);
     } catch {}
@@ -255,7 +251,7 @@ export default function Duplicates() {
         )}</Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: spacing.lg }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: spacing.lg, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }}>
         {groups.map((g) => (
           <View key={g.id} style={styles.group}>
             <View style={styles.groupHead}>

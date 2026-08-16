@@ -13,7 +13,7 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
-import { colors, font, formatBytes, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, formatBytes, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { ScreenHeader } from "@/src/components/ui";
 import { api } from "@/src/lib/api";
 import { useApp } from "@/src/lib/store";
@@ -105,7 +105,7 @@ export default function Trash() {
       ) : (
         <>
           <ScrollView
-            contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 120 }}
+            contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 120, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }}
             refreshControl={<RefreshControl refreshing={false} onRefresh={load} tintColor={colors.brand} />}
           >
             <Text style={styles.hint}>

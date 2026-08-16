@@ -25,6 +25,17 @@ RAM/CPU boost). Every delete has a 7-day trash/undo safety net.
   app manager, privacy cleaner, security scan, file vault, trash/recovery, premium paywall.
 - Honest metrics; 7-day trash before permanent delete; contextual permission handling.
 
+## Updated (2026-08-16, iteration 3 — free + responsive + real access)
+- **Premium removed — everything is free.** Deleted all paywall gates: duplicate-scan cap,
+  compressor cap, Vault premium wall, Auto-Pilot gate, "Go Premium" tool tile + PRO badges,
+  Settings premium banner (now an "All tools unlocked" banner). `premium` is always true.
+- **Responsive on all devices:** content is centered with a `maxContentWidth` (640) across every
+  screen, so phones stay full-width while tablets/large screens no longer stretch cards.
+- **Real device access:** photos via expo-media-library (duplicate finder, compressor, offload),
+  storage via expo-file-system, battery via expo-battery, and **real files via expo-document-picker**
+  (Vault "Add files" now imports actual photos/documents from the device). Sample data is used only
+  in web preview / when permission isn't granted (clearly labelled).
+
 ## Implemented (2026-08-16, iteration 2 — new features)
 - **Photo Compressor** (`/compress`): scans largest photos, live "estimated savings" that
   updates with selection + compression level (High/Balanced/Max), real on-device compression via

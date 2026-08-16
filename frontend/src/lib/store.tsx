@@ -27,7 +27,8 @@ const Ctx = createContext<AppState | null>(null);
 const PREMIUM_KEY = "dmp_premium";
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [premium, setPremiumState] = useState(false);
+  // All tools are free — premium is always unlocked.
+  const [premium, setPremiumState] = useState(true);
   const insets = useSafeAreaInsets();
 
   const [msg, setMsg] = useState<string>("");
@@ -38,8 +39,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const p = await storage.getItem(PREMIUM_KEY, false);
-      setPremiumState(!!p);
+      await storage.setItem(PREMIUM_KEY, true);
+      setPremiumState(true);
     })();
   }, []);
 

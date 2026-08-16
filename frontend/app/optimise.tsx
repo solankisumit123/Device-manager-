@@ -4,7 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { haptics } from "@/src/lib/haptics";
-import { colors, font, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { PillButton, ScreenHeader } from "@/src/components/ui";
 import { ScoreGauge } from "@/src/components/ScoreGauge";
 import {
@@ -82,7 +82,7 @@ export default function Optimise() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <ScreenHeader title="Optimise" onBack={() => router.back()} />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 120, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }} showsVerticalScrollIndicator={false}>
         <View style={styles.topRow}>
           <View>
             <Text style={styles.statusBig}>{status}</Text>

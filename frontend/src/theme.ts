@@ -43,6 +43,8 @@ export const radius = {
   pill: 999,
 };
 
+export const maxContentWidth = 640;
+
 export const font = {
   sm: 12,
   base: 14,

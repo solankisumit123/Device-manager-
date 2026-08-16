@@ -97,7 +97,7 @@ export default function Apps() {
         <SortChip value="name" label="A–Z" />
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: 120, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }} showsVerticalScrollIndicator={false}>
         {sorted.map((a) => {
           const isSel = selected.has(a.key);
           const unused = a.lastUsedDays >= 60;

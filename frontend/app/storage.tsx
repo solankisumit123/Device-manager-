@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { colors, font, formatBytes, radius, shadow, spacing } from "@/src/theme";
+import { colors, font, formatBytes, maxContentWidth, radius, shadow, spacing } from "@/src/theme";
 import { Card, ScreenHeader } from "@/src/components/ui";
 import { DonutChart, DonutLegend } from "@/src/components/DonutChart";
 import { DeviceSnapshot, getDeviceSnapshot, storageBreakdown } from "@/src/lib/device";
@@ -32,7 +32,7 @@ export default function Storage() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <ScreenHeader title="Storage analyzer" onBack={() => router.back()} />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, width: "100%", maxWidth: maxContentWidth, alignSelf: "center" }} showsVerticalScrollIndicator={false}>
         {snap ? (
           <Card style={styles.chartCard}>
             <DonutChart
